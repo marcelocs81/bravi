@@ -1,0 +1,57 @@
+version: '2'
+services:
+  app:
+    command: "true"
+    image: alpine:3.4
+    volumes:
+      - .:/var/www/app
+  php:
+    build: docker/php
+    expose:
+      - 9000
+    volumes:
+      - composer-cache:/composer/cache
+    volumes_from:
+      - app
+    networks:
+      - back
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:4.9.5
+    restart: always
+    volumes:
+      - ./wp-content:/var/www/html/wp-content 
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_PASSWORD:
+    ports:
+      - 80:80 # Expose http and https
+      - 443:443
+    networks:
+      - back
+  db:
+    image: mysql:5.7.19
+    restart: always
+    volumes:
+       - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD:
+    networks:
+      - back
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD:
+    networks:
+      - back
+networks:
+  back:
+volumes:
+  db_data:

@@ -1,0 +1,5 @@
+/vendor
+/wp
+composer.phar
+composer.lock
+/.idea
